@@ -1,0 +1,228 @@
+<!--Author: RILEY PETERSON-->
+<!--Contact: RJWPETERSON@csu.fullerton.edu-->
+<!--File Description: Generates a visual display of the Ant 12 problem for a few
+thousand steps. Also alows you to go back to the main file.-->
+<!doctype html>
+<html>
+<head>
+<title>Cellar Ant</title>
+<body><h1>TP Ant #12 Algorithm Visualization</h1>
+<h4>Time-stamp: <2019-09-21 09/21/2019 Team Name: ARS  CPSC 335-05></h4>
+
+
+    <meta charset='utf-8' />
+    <link rel="stylesheet" href="css/style.css" />
+	<script src="draw-rect.js"></script>
+	<script src="shapes.js"></script>
+	<script src="tools.js"></script>
+  <style type="text/css">
+  canvas {
+    background: black;
+  }
+  </style>
+
+</head>
+<body>
+<canvas height='410' width='410' id='mycanvas'></canvas>
+<script>
+    //how frequently the ant takes a step
+    var interval = 10 // in ms
+
+
+    //grab the canvas fron the html and match it to a varible
+    var canvas = document.getElementById("mycanvas");
+    //sets the canvas settings to 2 dementional
+    ctx = canvas.getContext('2d');
+
+// function to draw a grid	taken from tool file
+function draw_grid( rctx, rminor, rmajor, rstroke, rfill  )
+{
+    rctx.save( );
+    rctx.strokeStyle = rstroke;
+    rctx.fillStyle = rfill;
+    let width = rctx.canvas.width;
+    let height = rctx.canvas.height;
+
+    for ( var ix = 0; ix < width; ix += rminor )
+    {
+        rctx.beginPath( );
+        rctx.moveTo( ix, 0 );
+        rctx.lineTo( ix, height );
+        rctx.lineWidth = ( ix % rmajor == 0 ) ? 0.5 : 0.25;
+        rctx.stroke( );
+       if ( ix % rmajor == 0  ) { rctx.fillText( ix/10, ix, 10 ); }
+    }
+    for ( var iy = 0; iy < height; iy += rminor )
+    {
+        rctx.beginPath( );
+        rctx.moveTo( 0, iy );
+        rctx.lineTo( width, iy );
+        rctx.lineWidth = ( iy % rmajor == 0 ) ? 0.5 : 0.25;
+        rctx.stroke( );
+       if ( iy % rmajor == 0  ) {rctx.fillText( iy/10, 0, iy + 10 );}
+    }
+    rctx.restore( );
+}
+  //call draw grid
+  draw_grid( ctx, 5, 50, 'grey', 'blue');
+
+    // set height and width of the canvas
+    var canvas_width = 410;
+    var canvas_height = 410;
+
+    // this creates 2d array
+    var array = new Array(canvas_width);
+    for (var i = 0; i < canvas_width; i++) {
+        array[i] = new Array(canvas_width);
+    }
+
+    // Direction for the ant
+    var RIGHT = "right";
+    var LEFT = "left";
+    var UP = "up";
+    var DOWN = "down";
+
+    // can change the direction and the interval here
+    var Diameter_Rect = 5;
+    var x = (canvas_width / 2);
+    var y = (canvas_height / 2);
+
+    var direction = LEFT; // heading west
+    var counter = 0
+
+    //function which uses the direction and possiton and draws an ant
+    function draw_ant(){
+      var antShift = Diameter_Rect;
+      var antHalfShift = Diameter_Rect / 2;
+      ctx.beginPath()
+      if (UP == direction){
+        //create arrow poiint starting
+        ctx.moveTo(x+antHalfShift,y);
+        //draw edges
+        ctx.lineTo(x+antShift,y+antShift);
+        ctx.lineTo(x,y+antShift);
+      }
+      else if (direction == DOWN){
+        //create arrow poiint starting
+        ctx.moveTo(x+antHalfShift,y+antShift);
+        //draw edges
+        ctx.lineTo(x,y);
+        ctx.lineTo(x+antShift,y);
+      }
+      else if (direction == RIGHT){
+        //create arrow poiint starting
+        ctx.moveTo(x+antShift,y+antHalfShift);
+        //draw edges
+        ctx.lineTo(x,y);
+        ctx.lineTo(x,y+antShift);
+      }
+      else if (direction == LEFT){
+        //create arrow poiint starting
+        ctx.moveTo(x,y+antHalfShift);
+        //draw edges
+        ctx.lineTo(x+antShift,y+antShift);
+        ctx.lineTo(x+antShift,y);
+      }
+      ctx.fillStyle = "#ffffff"; //white
+      ctx.fill();
+    }
+    //direction = RIGHT //testing direction
+    draw_ant()
+
+    //function which draws the ant on the grid and a path of where it has been
+    function moveAnt(){
+        // which directions to turn?
+        if (array[x][y] == 0 || array[x][y] == 1){
+            /* White square, turn 90° right */
+            if(direction == UP){
+                direction = RIGHT;
+            }else if(direction == LEFT){
+                direction = UP;
+            }else if(direction == DOWN){
+                direction = LEFT;
+            }else{
+                // if directtion is right turn down
+                direction = DOWN;
+            }
+        }
+        else {
+            // array[x][y] === 1
+            // Colored square turn 90° left
+            if(direction == UP){
+                direction = LEFT;
+            }else if(direction == LEFT){
+                direction = DOWN;
+            }else if(direction == DOWN){
+                direction = RIGHT;
+            }else {
+                /* Direction is RIGHT, change to UP */
+                direction = UP;
+            }
+        }
+
+        //Flip the color of the square
+        if(array[x][y] == 0){
+            ctx.fillStyle = "#ff0000"; //red
+            ctx.fillRect(x , y, Diameter_Rect, Diameter_Rect);
+            /* Record that rect has been filled */
+            array[x][y] = 1;
+        }
+        else if(array[x][y] == 1){
+            ctx.fillStyle = "#ffff00"; //yellow
+            ctx.fillRect(x , y, Diameter_Rect, Diameter_Rect);
+            /* Record that rect has been filled */
+            array[x][y] = 2;
+        }
+        else if(array[x][y] == 2){
+            ctx.fillStyle = "#0000FF"; //#blue
+            ctx.fillRect(x , y, Diameter_Rect, Diameter_Rect);
+            /* Record that rect has been filled */
+            array[x][y] = 3;
+        }
+        else{
+            ctx.fillStyle = "#2f2f2f"; //black
+            ctx.fillRect(x , y , Diameter_Rect, Diameter_Rect);
+            // Record that squares has been filled
+            array[x][y] = 0;
+        }
+
+        // Move forward one unit
+        if(direction == RIGHT){
+            //move x to the right
+            x += Diameter_Rect;
+            //no need to change y
+        }
+        else if(direction == UP){
+            //no need to change x
+            //move y up
+            y += Diameter_Rect;
+        }
+        else if(direction == LEFT){
+            //move x to the left
+            x -= Diameter_Rect;
+            //no need to change y
+        }
+        else{
+            //direction == DOWN
+            //no need to change x
+            //move y down
+            y -=Diameter_Rect;
+        }
+
+        // draw red ant at current updated possition
+        draw_ant()
+        //add one step to counter and update html
+        counter++
+        document.getElementById("counter").innerHTML = counter
+        }
+
+    // call moveAnt once evert (interval) ms
+    setInterval(moveAnt, interval)
+ </script>
+ <br>
+ <!-- return to home page link -->
+ <a href="index.html"><h1>Home</h1></a>
+ Steps:
+ <p id="counter"></p>
+ </body>
+ </html>

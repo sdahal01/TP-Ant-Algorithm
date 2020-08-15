@@ -1,0 +1,199 @@
+
+
+
+<!--PROJECT INFORMATION: 
+Class: CPSC 335
+Section: 05
+Project Number: 01
+Project Name: TP Ant Algorithm
+Team Name: ARS
+Team Members: Andrew Ta: , Riley Peterson , Samprayash Dahal  
+Contact: andrewman8798@csu.fullerton.edu, RJWPETERSON@csu.fullerton.edu, sdahal@csu.fullerton.edu   -->
+<!--Project Description:
+Turk & Propp's Ants (TP Ants) crawl on a 2D grid where each cell has a color (initially all are black). As an
+Ant crawls, it changes its direction/heading and it also changes the color of the cell under it. In particular, the
+cell's color is “incremented” to the next color in sequence (wrapping around to the 0th color if needed). And
+each color is associated with a change of direction: to the Left or to the Right of the Ant's current heading.
+Initially, the grid is all black and the Ant is in the center cell, heading West (toward the left).-->
+
+<!doctype html>
+<html>
+<head>
+<title>Cellar Ant</title>
+<body><h1>TP Ant Algorithm Visualization</h1>
+<h4>Time-stamp: <2019-09-21 09/21/2019 Team Name: ARS  CPSC 335-05></h4>
+
+
+    <meta charset='utf-8' />
+    <link rel="stylesheet" href="css/style.css" />
+	<script src="draw-rect.js"></script>
+	<script src="shapes.js"></script>
+	<script src="tools.js"></script>
+  <style type="text/css">
+  canvas {
+    background: black;
+  }
+  </style>
+
+</head>
+<body>
+<canvas height='410' width='410' id='mycanvas'></canvas>
+<script>
+    //how frequently the ant takes a step
+    var interval = 10 // in ms
+
+
+    //grab the canvas fron the html and match it to a varible
+    var canvas = document.getElementById("mycanvas");
+    //sets the canvas settings to 2 dementional
+    ctx = canvas.getContext('2d');
+
+// function to draw a grid	taken from tool file
+function draw_grid( rctx, rminor, rmajor, rstroke, rfill  )
+{
+    rctx.save( );
+    rctx.strokeStyle = rstroke;
+    rctx.fillStyle = rfill;
+    let width = rctx.canvas.width;
+    let height = rctx.canvas.height;
+
+    for ( var ix = 0; ix < width; ix += rminor )
+    {
+        rctx.beginPath( );
+        rctx.moveTo( ix, 0 );
+        rctx.lineTo( ix, height );
+        rctx.lineWidth = ( ix % rmajor == 0 ) ? 0.5 : 0.25;
+        rctx.stroke( );
+       if ( ix % rmajor == 0  ) { rctx.fillText( ix/10, ix, 10 ); }
+    }
+    for ( var iy = 0; iy < height; iy += rminor )
+    {
+        rctx.beginPath( );
+        rctx.moveTo( 0, iy );
+        rctx.lineTo( width, iy );
+        rctx.lineWidth = ( iy % rmajor == 0 ) ? 0.5 : 0.25;
+        rctx.stroke( );
+       if ( iy % rmajor == 0  ) {rctx.fillText( iy/10, 0, iy + 10 );}
+    }
+    rctx.restore( );
+}
+  //call draw grid
+  draw_grid( ctx, 5, 50, 'grey', 'yellow');
+
+    // set height and width of the canvas
+    var canvas_width = 410;
+    var canvas_height = 410;
+
+    // this creates 2d array
+    var array = new Array(canvas_width);
+    for (var i = 0; i < canvas_width; i++) {
+        array[i] = new Array(canvas_width);
+    }
+
+    // Direction for the ant
+    var right = "right";
+    var left = "left";
+    var up = "up";
+    var down = "down";
+
+    // can change the direction and the interval here
+    var Diameter_Rect = 5;
+    var x = (canvas_width / 2);
+    var y = (canvas_height / 2);
+
+    var direction = left; // heading west
+    var counter = 0
+    ctx.fillStyle="#ff0000"; //red
+    ctx.fillRect(x, y, Diameter_Rect, Diameter_Rect);
+
+    //function which draws the ant on the grid and a path of where it has been
+    function moveAnt(){
+        // which directions to turn?
+        if(array[x][y] == 0){
+            /* White square, turn 90° right */
+            if(direction == up){
+                direction = right;
+            }else if(direction == left){
+                direction = up;
+            }else if(direction == down){
+                direction = left;
+            }else{
+               // if directtion is right we turn down
+                direction = down;
+            }
+        }
+        else {
+            // array[x][y] === 1
+            // Colored square turn 90° left
+            if(direction == up){
+                direction = left;
+            }else if(direction == left){
+                direction = down;
+            }else if(direction == down){
+                direction = right;
+            }else {
+                // if the direction is right, then we change it to up 
+                direction = up;
+            }
+        }
+
+        //Flip the color of the square
+        if(array[x][y] == 0){
+            ctx.fillStyle = "#2f2f2f"; //black
+            ctx.fillRect(x , y, Diameter_Rect, Diameter_Rect);
+            //the rect has been filled 
+            array[x][y] = 1;
+        }else{
+            ctx.fillStyle = "#ffffff"; //white
+            ctx.fillRect(x , y , Diameter_Rect, Diameter_Rect);
+            // the squares has been filled
+            array[x][y] = 0;
+        }
+
+        // Move forward one unit
+        if(direction == right){
+             /* y doenst need to be changed
+				change x to the right 
+			*/
+            x += Diameter_Rect;
+            
+        }
+        else if(direction == up){
+            /* x stays the same 
+             we have to move y up */
+            y += Diameter_Rect;
+        }
+        else if(direction == left){
+            /* we move x to the left
+				y stays the same */
+            x -= Diameter_Rect;
+            
+        }
+        else{
+             /* 
+			when direction == down
+             x stays the same
+             we need to move y down
+			 */
+            y -=Diameter_Rect;
+        }
+
+        // draw red ant at current updated possition
+        ctx.fillStyle="#ff0000"; //red
+        ctx.fillRect(x, y, Diameter_Rect, Diameter_Rect);
+    //add one step to counter and update html
+    counter++
+    document.getElementById("counter").innerHTML = counter
+
+    }
+
+    // call moveAnt once evert (interval) ms
+    setInterval(moveAnt, interval)
+ </script>
+ <br>
+ <!-- return to home page link -->
+ <a href="index.html"><h1>Home</h1></a>
+ Steps:
+ <p id="counter"></p>
+ </body>
+ </html>
